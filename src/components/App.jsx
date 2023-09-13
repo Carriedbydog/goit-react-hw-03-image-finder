@@ -27,7 +27,7 @@ export const App = () => {
         {/* <Loader/> */}
         {/* <Modal /> */}
       </StyledApp>
-      <Button />
+      <Button title="Load More" />
     </>
   );
 };

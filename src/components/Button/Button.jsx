@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyledButtonDiv, StyledButtonLoad } from './Button.styled';
 
-export const Button = () => {
+export const Button = ({ title }) => {
   return (
     <StyledButtonDiv>
-      <StyledButtonLoad>Load more</StyledButtonLoad>
+      <StyledButtonLoad>{title}</StyledButtonLoad>
     </StyledButtonDiv>
   );
 };
