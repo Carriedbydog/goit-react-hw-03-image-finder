@@ -24,7 +24,7 @@ export default class App extends Component {
     this.setState({ loading: true });
     try {
       const { page, per_page, q } = this.state;
-      await this.fetchData(page, per_page, q);
+      await getGallery(page, per_page, q);
     } catch (error) {
       console.log(error);
     } finally {
@@ -37,25 +37,23 @@ export default class App extends Component {
     if (prevState.page !== page || prevState.q !== q) {
       this.setState({ loading: true });
       try {
-        await this.fetchData(page, per_page, q);
+        const { hits, totalHits } = await getGallery({ page, per_page, q });
+        const maxImg = Math.ceil(totalHits / per_page);
+        this.setState(prev => ({
+          gallery: [...prev.gallery, ...hits],
+          maxImg,
+        }));
       } catch (error) {
-        console.log(error);
+        this.setState({ error: error });
       } finally {
         this.setState({ loading: false });
       }
     }
   }
-  fetchData = async (page, per_page, q) => {
-    const { hits, totalHits } = await getGallery({ page, per_page, q });
-    const maxImg = Math.ceil(totalHits / per_page);
-    if (hits && totalHits > 0) {
-      this.setState(prev => ({ gallery: [...prev.gallery, ...hits], maxImg }));
-    }
-  };
   onLoadMore = () => {
     const { page, maxImg } = this.state;
     if (page < maxImg) {
-      this.setState(prev => ({ page: prev.page + this.state.per_page }));
+      this.setState(prev => ({ page: prev.page + 1 }));
     }
   };
   handleOpenModal = img => {
