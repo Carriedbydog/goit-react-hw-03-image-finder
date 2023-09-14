@@ -13,7 +13,7 @@ export default class Searchbar extends Component {
     q: '',
   };
   handleChange = e => {
-    this.setState({ q: e.target.value });
+    this.setState({ q: e.target.value.trim() });
   };
   handleSubmit = e => {
     e.preventDefault();

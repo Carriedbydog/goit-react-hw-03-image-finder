@@ -16,6 +16,8 @@ export default class App extends Component {
     per_page: 12,
     q: '',
     currentImg: null,
+    error: null,
+    maxImg: 0,
   };
 
   async componentDidMount() {
@@ -31,6 +33,7 @@ export default class App extends Component {
   }
   async componentDidUpdate(_, prevState) {
     const { page, per_page, q } = this.state;
+
     if (prevState.page !== page || prevState.q !== q) {
       this.setState({ loading: true });
       try {
@@ -43,13 +46,17 @@ export default class App extends Component {
     }
   }
   fetchData = async (page, per_page, q) => {
-    const { hits } = await getGallery({ page, per_page, q });
-    if (hits) {
-      this.setState(prev => ({ gallery: [...prev.gallery, ...hits] }));
+    const { hits, totalHits } = await getGallery({ page, per_page, q });
+    const maxImg = Math.ceil(totalHits / per_page);
+    if (hits && totalHits > 0) {
+      this.setState(prev => ({ gallery: [...prev.gallery, ...hits], maxImg }));
     }
   };
   onLoadMore = () => {
-    this.setState(prev => ({ page: prev.page + this.state.per_page }));
+    const { page, maxImg } = this.state;
+    if (page < maxImg) {
+      this.setState(prev => ({ page: prev.page + this.state.per_page }));
+    }
   };
   handleOpenModal = img => {
     this.setState(prev => ({ isOpen: !prev.isOpen, currentImg: img }));
@@ -61,7 +68,8 @@ export default class App extends Component {
     this.setState({ isOpen: false });
   };
   render() {
-    const { loading, isOpen, gallery, currentImg } = this.state;
+    const { loading, isOpen, gallery, currentImg, error, q, maxImg, page } =
+      this.state;
     return (
       <>
         <StyledApp>
@@ -75,9 +83,15 @@ export default class App extends Component {
               handleOpenModal={this.handleOpenModal}
             />
           )}
+          {error && <h2>Something went wrong</h2>}
+          {!gallery.length && q && !loading && (
+            <h2>I didn't find anything, try again</h2>
+          )}
           {isOpen && <Modal close={this.closeModal} currentImg={currentImg} />}
         </StyledApp>
-        <Button title="Load More" onLoadMore={this.onLoadMore} />
+        {gallery.length > 0 && page < maxImg && (
+          <Button title="Load More" onLoadMore={this.onLoadMore} />
+        )}
       </>
     );
   }
